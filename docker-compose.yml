@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  
+  docker_mongodb:
+      image: mongo:5.0.13
+      restart: always
+      ports:
+        - 38017:27017
+      volumes:
+        - ./MongoData:/data/db
+        - ./db_initial_data/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=admin
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ADMIN_PASSWORD}
+        - MONGO_INITDB_DATABASE=admin
+        - DATABASE
+        - DB_USER
+        - DB_PASS
+        - DUMP_USER
+        - DUMP_USER_PWD
+      deploy:
+        resources:
+            limits:
+              cpus: ${DB_CPU_LIMIT}
+              memory: ${DB_MEMORY_LIMIT}
+
+  docker_mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3406:3306"
+    volumes:
+      - ./db_initial_data/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./mysql_data:/var/lib/mysql
+    deploy:
+        resources:
+            limits:
+              cpus: ${DB_CPU_LIMIT}
+              memory: ${DB_MEMORY_LIMIT}
